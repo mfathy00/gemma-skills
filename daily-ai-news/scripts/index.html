@@ -14,7 +14,7 @@
 
       const topRes = await fetch("https://hacker-news.firebaseio.com/v0/topstories.json");
       const allIds = await topRes.json();
-      const ids = allIds.slice(0, 60);
+      const ids = allIds.slice(0, 30);
 
       const stories = await Promise.all(
         ids.map(id =>
@@ -26,23 +26,17 @@
         if (!s || !s.title) return false;
         const t = s.title.toLowerCase();
         return keywords.some(k => t.includes(k));
-      }).slice(0, 8);
+      }).slice(0, 6);
 
       if (aiStories.length === 0) {
-        return JSON.stringify({ result: "No AI stories found right now. Try again later." });
+        return JSON.stringify({ result: "No AI stories in HackerNews top 30 right now." });
       }
 
-      let result = "Top AI Stories on HackerNews:
-
-";
+      let result = "Top AI Stories on HackerNews:\n\n";
       aiStories.forEach((s, i) => {
-        result += (i + 1) + ". " + s.title + "
-";
-        if (s.url) result += "   " + s.url + "
-";
-        result += "   Score: " + s.score + " | Comments: " + (s.descendants || 0) + "
-
-";
+        result += (i + 1) + ". " + s.title + "\n";
+        if (s.url) result += "   " + s.url + "\n";
+        result += "   Score: " + s.score + "\n\n";
       });
 
       return JSON.stringify({ result: result });
