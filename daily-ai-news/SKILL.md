@@ -1,13 +1,16 @@
 ---
 name: daily-ai-news
-description: Get the latest AI news from HackerNews. Use when user asks about AI news, latest AI updates, new AI models, or AI announcements.
+description: Get the latest AI news. Use this when the user asks about AI news, latest AI updates, new AI models, or AI announcements.
 ---
 
 # Daily AI News
 
 ## Instructions
 
-Call the `run_js` tool using `index.html` and a JSON string for `data` with the following fields:
-- **query**: Required. Set this to "ai" always.
+When the user asks for AI news, you MUST call the `run_js` tool with these exact parameters:
+- **filename**: `index.html`
+- **data**: `{}`
 
-After getting the result, present the news stories to the user in a clear readable format with the title and link for each story.
+The tool will return a JSON object containing a `result` field with the latest AI news stories.
+
+After receiving the result, present the news stories to the user clearly, keeping the titles and URLs from the response.
