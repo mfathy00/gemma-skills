@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body>
+<script>
+async function ai_edge_gallery_get_result(userMessage) {
+  try {
+    // Fetch top story IDs from HackerNews
+    const topRes = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json');
+    const allIds = await topRes.json();
+
+    // Filter and fetch first 50 stories, keep AI-related ones
+    const ids = allIds.slice(0, 50);
+    const stories = await Promise.all(
+      ids.map(id =>
+        fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`).then(r => r.json())
+      )
+    );
+
+    const keywords = ['ai', 'llm', 'gpt', 'gemma', 'claude', 'openai', 'anthropic',
+                      'machine learning', 'neural', 'model', 'deepmind', 'mistral',
+                      'artificial intelligence', 'transformer', 'gemini'];
+
+    const aiStories = stories.filter(s => {
+      if (!s || !s.title) return false;
+      const t = s.title.toLowerCase();
+      return keywords.some(k => t.includes(k));
+    }).slice(0, 8);
+
+    if (aiStories.length === 0) {
+      return "No AI stories found in top HackerNews stories right now. Try again later.";
+    }
+
+    let result = "Latest AI News from HackerNews:\n\n";
+    aiStories.forEach((s, i) => {
+      result += `${i + 1}. ${s.title}\n`;
+      if (s.url) result += `   ${s.url}\n`;
+      result += `   Score: ${s.score} | Comments: ${s.descendants || 0}\n\n`;
+    });
+
+    return result;
+  } catch (err) {
+    return "Error fetching news: " + err.message;
+  }
+}
+
+window.ai_edge_gallery_get_result = ai_edge_gallery_get_result;
+</script>
+</body>
+</html>
