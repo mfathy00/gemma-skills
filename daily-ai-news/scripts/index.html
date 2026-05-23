@@ -1,49 +1,27 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Daily AI News</title>
-</head>
+<head><meta charset="UTF-8" /><title>Daily AI News</title></head>
 <body>
 <script>
-  window["ai_edge_gallery_get_result"] = async (data) => {
-    try {
-      const keywords = ["ai","llm","gpt","gemma","claude","openai","anthropic",
-                        "machine learning","neural","deepmind","mistral",
-                        "artificial intelligence","transformer","gemini","chatgpt"];
-
-      const topRes = await fetch("https://hacker-news.firebaseio.com/v0/topstories.json");
-      const allIds = await topRes.json();
-      const ids = allIds.slice(0, 30);
-
-      const stories = await Promise.all(
-        ids.map(id =>
-          fetch("https://hacker-news.firebaseio.com/v0/item/" + id + ".json").then(r => r.json())
-        )
-      );
-
-      const aiStories = stories.filter(s => {
-        if (!s || !s.title) return false;
-        const t = s.title.toLowerCase();
-        return keywords.some(k => t.includes(k));
-      }).slice(0, 6);
-
-      if (aiStories.length === 0) {
-        return JSON.stringify({ result: "No AI stories in HackerNews top 30 right now." });
-      }
-
-      let result = "Top AI Stories on HackerNews:\n\n";
-      aiStories.forEach((s, i) => {
-        result += (i + 1) + ". " + s.title + "\n";
-        if (s.url) result += "   " + s.url + "\n";
-        result += "   Score: " + s.score + "\n\n";
-      });
-
-      return JSON.stringify({ result: result });
-    } catch (err) {
-      return JSON.stringify({ error: "Failed to fetch news: " + err.message });
+window["ai_edge_gallery_get_result"] = async (data) => {
+  try {
+    const res = await fetch("https://hn.algolia.com/api/v1/search?query=AI&tags=front_page&hitsPerPage=8");
+    const json = await res.json();
+    const hits = json.hits || [];
+    if (hits.length === 0) {
+      return JSON.stringify({ result: "No AI news found." });
     }
-  };
+    let out = "Top AI News:\n\n";
+    hits.forEach((h, i) => {
+      out += (i + 1) + ". " + h.title + "\n";
+      if (h.url) out += "   " + h.url + "\n";
+      out += "   Points: " + (h.points || 0) + "\n\n";
+    });
+    return JSON.stringify({ result: out });
+  } catch (e) {
+    return JSON.stringify({ error: "Fetch failed: " + e.message });
+  }
+};
 </script>
 </body>
 </html>
